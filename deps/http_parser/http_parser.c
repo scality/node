@@ -1300,10 +1300,14 @@ reexecute:
         const char* start = p;
         for (; p != data + len; p++) {
           ch = *p;
-          c = TOKEN(ch);
 
-          if (!c)
-            break;
+          if (parser->lenient_http_header_names && ch == '/') {
+            c = '/';
+          } else {
+            c = TOKEN(ch);
+            if (!c)
+              break;
+          }
 
           switch (parser->header_state) {
             case h_general:
@@ -2143,12 +2147,18 @@ http_method_str (enum http_method m)
 void
 http_parser_init (http_parser *parser, enum http_parser_type t)
 {
+  const char *lenient_env = getenv("ALLOW_INVALID_META_HEADERS");
+
   void *data = parser->data; /* preserve application data */
   memset(parser, 0, sizeof(*parser));
   parser->data = data;
   parser->type = t;
   parser->state = (t == HTTP_REQUEST ? s_start_req : (t == HTTP_RESPONSE ? s_start_res : s_start_req_or_res));
   parser->http_errno = HPE_OK;
+
+  if (lenient_env != NULL && lenient_env[0] == '1') {
+    parser->lenient_http_header_names = 1;
+  }
 }
 
 void

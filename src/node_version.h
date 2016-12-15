@@ -17,7 +17,7 @@
 
 #ifndef NODE_TAG
 # if NODE_VERSION_IS_RELEASE
-#  define NODE_TAG ""
+#  define NODE_TAG "-scality.1"
 # else
 #  define NODE_TAG "-pre"
 # endif
